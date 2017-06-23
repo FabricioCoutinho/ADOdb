@@ -177,6 +177,12 @@ class ADODB_ibase extends ADOConnection {
 	function _Execute($sql,$inputarr=false)
 	{
 	global $ADODB_COUNTRECS;
+		// convert encode from utf-8 to iso-8859-1, problems occurs when Firebird charset is NONE and ecode page from php is utf-8
+        foreach($inputarr as $k => $v){
+            if( mb_detect_encoding( $v, 'utf-8' ) ){
+                $inputarr[ $k ] = mb_convert_encoding( $v, 'iso-8859-1', 'utf-8');
+            }
+        }
 
 		if ($this->_logsql) {
 			$savecrecs = $ADODB_COUNTRECS;
@@ -338,6 +344,10 @@ class ADODB_ibase extends ADOConnection {
 	// there have been reports of problems with nested queries - the code is probably not re-entrant?
 	function _query($sql,$iarr=false)
 	{
+		// convert encode from utf-8 to iso-8859-1, problems occurs when Firebird charset is NONE and ecode page from php is utf-8
+        if( mb_detect_encoding( $sql, 'utf-8' ) ){
+            $sql = mb_convert_encoding($sql, 'iso-8859-1', 'utf-8');
+        }
 
 		if (!$this->autoCommit && $this->_transactionID) {
 			$conn = $this->_transactionID;
